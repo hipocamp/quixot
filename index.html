@@ -3,121 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quixot Mobile</title>
+    <title>Quixot vs Molins - NeurekaLAB</title>
     
-    <!-- Icones del Quixot -->
+    <!-- Icona del Quixot per al mòbil -->
     <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/512/8b4513/don-quixote.png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/512/8b4513/don-quixote.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#fef3c7">
+    <meta name="theme-color" content="#2563eb">
 
     <style>
-        /* CSS PUR - Molt resistent */
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #fef3c7; font-family: sans-serif; }
-        #wrapper { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #fef3c7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #joc-container { position: relative; height: 100vh; width: 100vw; display: flex; flex-direction: column; }
         
-        header { height: 60px; background: #8b4513; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; }
-        header p { margin: 0; font-size: 10px; text-transform: uppercase; color: #fde68a; font-weight: bold; }
-        header span { font-size: 20px; font-weight: 900; }
+        /* Capçalera */
+        header { 
+            height: 70px; background: #1e293b; color: white; display: flex; 
+            justify-content: space-between; align-items: center; padding: 0 20px; 
+            box-sizing: border-box; z-index: 10; border-bottom: 3px solid #8b4513;
+        }
+        .stat-label { font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 800; letter-spacing: 1px; }
+        .stat-val { font-size: 20px; font-weight: 900; color: #facc15; }
 
-        #jocCanvas { flex-grow: 1; background-color: #bae6fd; width: 100%; touch-action: none; }
+        /* Pantalla de joc */
+        canvas { background-color: #bae6fd; flex-grow: 1; touch-action: none; }
 
-        footer { height: 140px; background: #78350f; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 15px; box-sizing: border-box; }
-        .btn { background: #92400e; border-radius: 15px; border: none; color: white; font-size: 35px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        .btn:active { background: #b45309; }
-        .btn-foc { background: #dc2626; border-radius: 50%; box-shadow: 0 5px 0 #991b1b; }
-        .btn-foc:active { transform: translateY(3px); box-shadow: 0 2px 0 #991b1b; }
+        /* Peu de pàgina */
+        footer { 
+            position: absolute; bottom: 10px; width: 100%; text-align: center; 
+            pointer-events: none; color: rgba(255,255,255,0.6); font-size: 10px; 
+            font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
+        }
 
-        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; }
-        .final-box { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 20px; margin: 20px 0; width: 250px; border: 1px solid rgba(255,255,255,0.2); }
+        /* Overlay Game Over */
+        #game-over { 
+            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); 
+            color: white; flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 100; text-align: center; backdrop-filter: blur(5px);
+        }
+        .btn-restart { 
+            background: #2563eb; color: white; border: none; padding: 15px 40px; 
+            border-radius: 50px; font-weight: 900; font-size: 18px; cursor: pointer; 
+            margin-top: 20px; box-shadow: 0 10px 0 #1e40af;
+        }
     </style>
 </head>
 <body>
 
-    <div id="wrapper">
+    <div id="joc-container">
         <header>
-            <div><p>Punts</p><span id="val-punts">0</span></div>
-            <div id="val-vides" style="font-size: 20px;">❤️❤️❤️</div>
-            <div style="text-align: right;"><p>Rècord</p><span id="val-record">0</span></div>
+            <div><p class="stat-label">Punts</p><span id="val-punts" class="stat-val">0</span></div>
+            <div id="val-vides" style="font-size: 22px;">❤️❤️❤️</div>
+            <div style="text-align: right;"><p class="stat-label">Rècord</p><span id="val-record" class="stat-val">0</span></div>
         </header>
 
         <canvas id="jocCanvas"></canvas>
 
-        <footer>
-            <button class="btn" id="moure-esq">⬅️</button>
-            <button class="btn btn-foc" id="disparar">🔥</button>
-            <button class="btn" id="moure-dre">➡️</button>
-        </footer>
-    </div>
-
-    <div id="overlay">
-        <h2 style="font-size: 40px; margin: 0; font-style: italic;">GAME OVER</h2>
-        <div class="final-box">
-            <p style="font-size: 12px; color: #fbbf24; margin: 0;">PUNTUACIÓ</p>
-            <p id="punts-finals" style="font-size: 45px; font-weight: 900; margin: 5px 0;">0</p>
-            <p style="font-size: 10px; color: #94a3b8; margin: 0;">MILLOR RÈCORD</p>
-            <p id="record-final" style="font-size: 20px; margin: 0;">0</p>
+        <div id="game-over">
+            <h2 style="font-size: 40px; margin: 0; font-style: italic; color: #f87171;">FINAL DE LA BATALLA</h2>
+            <div style="margin: 20px 0; border: 1px solid #334155; padding: 20px; border-radius: 20px; background: rgba(255,255,255,0.05);">
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">HAS ACONSEGUIT</p>
+                <p id="punts-finals" style="font-size: 60px; font-weight: 900; margin: 5px 0;">0</p>
+                <p id="txt-record" style="font-size: 12px; color: #fbbf24; display: none;">NOU RÈCORD!</p>
+            </div>
+            <button onclick="reiniciar()" class="btn-restart">TORNAR A CAVALCAR</button>
         </div>
-        <button onclick="reiniciar()" style="background: #2563eb; color: white; border: none; padding: 15px 40px; border-radius: 15px; font-weight: bold; font-size: 18px; cursor: pointer;">REINTENTAR</button>
+
+        <footer>By NeurekaLAB</footer>
     </div>
 
     <script>
         const canvas = document.getElementById("jocCanvas");
         const ctx = canvas.getContext("2d");
-        const overlay = document.getElementById("overlay");
+        const overlay = document.getElementById("game-over");
 
         let puntuacio = 0;
         let vides = 3;
         let jocActiu = true;
-        let record = localStorage.getItem("quixot_v3_record") || 0;
+        let record = localStorage.getItem("quixot_v4_record") || 0;
         document.getElementById("val-record").innerText = record;
 
-        // Ajustar resolució interna del canvas
         function ajustarMida() {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - 70;
         }
         window.addEventListener('resize', ajustarMida);
-        setTimeout(ajustarMida, 100);
+        ajustarMida();
 
-        const quixot = { x: 100, y: 0, w: 60, h: 60, vel: 7, esq: false, dre: false };
+        // Objectes
+        const quixot = { x: canvas.width / 2, y: 0, w: 70, h: 70, vel: 0, targetX: canvas.width / 2 };
         let llances = [];
         let molins = [];
+        let angleAspes = 0;
 
-        // Controls
-        document.getElementById("moure-esq").onpointerdown = () => quixot.esq = true;
-        document.getElementById("moure-esq").onpointerup = () => quixot.esq = false;
-        document.getElementById("moure-dre").onpointerdown = () => quixot.dre = true;
-        document.getElementById("moure-dre").onpointerup = () => quixot.dre = false;
-        document.getElementById("disparar").onclick = llançar;
+        // CONTROLS TÀCTILS (Toca esquerra per moure esquerra, dreta per moure dreta, mig per disparar)
+        window.addEventListener('touchstart', (e) => {
+            const touchX = e.touches[0].clientX;
+            const touchY = e.touches[0].clientY;
 
-        function llançar() {
             if (!jocActiu) return;
-            llances.push({ x: quixot.x + 15, y: quixot.y, w: 20, h: 40 });
+
+            if (touchY < window.innerHeight / 2) {
+                disparar();
+            } else {
+                if (touchX < window.innerWidth / 2) {
+                    quixot.vel = -8;
+                } else {
+                    quixot.vel = 8;
+                }
+            }
+        });
+
+        window.addEventListener('touchend', () => {
+            quixot.vel = 0;
+        });
+
+        function disparar() {
+            llances.push({ x: quixot.x + 30, y: quixot.y, w: 10, h: 40 });
+        }
+
+        // Dibuixar el Quixot (Imatge vectorial)
+        function dibuixarQuixot(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            // Cavall
+            ctx.fillStyle = "#5d4037";
+            ctx.fillRect(10, 40, 40, 20); // cos
+            ctx.fillRect(40, 25, 10, 20); // coll
+            // Genet (Quixot)
+            ctx.fillStyle = "#374151";
+            ctx.fillRect(20, 15, 15, 25); // cos
+            ctx.fillStyle = "#f3f4f6";
+            ctx.beginPath();
+            ctx.arc(27, 10, 8, 0, Math.PI * 2); // cap
+            ctx.fill();
+            // Llança
+            ctx.strokeStyle = "#94a3b8";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(35, 25);
+            ctx.lineTo(60, -10);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Dibuixar Molí de vent
+        function dibuixarMoli(m) {
+            ctx.save();
+            ctx.translate(m.x + m.w/2, m.y + m.h/2);
+            // Torre
+            ctx.fillStyle = "#f5f5f5";
+            ctx.beginPath();
+            ctx.moveTo(-20, 25);
+            ctx.lineTo(20, 25);
+            ctx.lineTo(15, -20);
+            ctx.lineTo(-15, -20);
+            ctx.fill();
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(-18, -25, 36, 10); // Teulada
+            
+            // Aspes girant
+            ctx.rotate(angleAspes);
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 4;
+            for(let i=0; i<4; i++) {
+                ctx.rotate(Math.PI/2);
+                ctx.beginPath();
+                ctx.moveTo(0,0);
+                ctx.lineTo(0, 30);
+                ctx.stroke();
+                ctx.fillStyle = "rgba(255,255,255,0.8)";
+                ctx.fillRect(-5, 10, 10, 20);
+            }
+            ctx.restore();
         }
 
         function perdreVida() {
             vides--;
             document.getElementById("val-vides").innerText = "❤️".repeat(vides);
-            if (vides <= 0) finalitzarJoc();
-        }
-
-        function finalitzarJoc() {
-            jocActiu = false;
-            if (puntuacio > record) {
-                record = puntuacio;
-                localStorage.setItem("quixot_v3_record", record);
+            if (vides <= 0) {
+                jocActiu = false;
+                if (puntuacio > record) {
+                    record = puntuacio;
+                    localStorage.setItem("quixot_v4_record", record);
+                    document.getElementById("txt-record").style.display = "block";
+                }
+                document.getElementById("punts-finals").innerText = puntuacio;
+                overlay.style.display = "flex";
             }
-            document.getElementById("punts-finals").innerText = puntuacio;
-            document.getElementById("record-final").innerText = record;
-            overlay.style.display = "flex";
         }
 
         function reiniciar() {
             puntuacio = 0; vides = 3; llances = []; molins = [];
             document.getElementById("val-punts").innerText = "0";
             document.getElementById("val-vides").innerText = "❤️❤️❤️";
-            document.getElementById("val-record").innerText = record;
+            document.getElementById("txt-record").style.display = "none";
             overlay.style.display = "none";
             jocActiu = true;
             bucle();
@@ -126,36 +205,33 @@
         function bucle() {
             if (!jocActiu) return;
 
-            // Actualitzar posició Quixot
-            quixot.y = canvas.height - 80;
-            if (quixot.esq && quixot.x > 0) quixot.x -= quixot.vel;
-            if (quixot.dre && quixot.x < canvas.width - quixot.w) quixot.x += quixot.vel;
+            quixot.y = canvas.height - 100;
+            quixot.x += quixot.vel;
+            if (quixot.x < 0) quixot.x = 0;
+            if (quixot.x > canvas.width - 70) quixot.x = canvas.width - 70;
 
-            // Crear molins
-            if (Math.random() < 0.03) {
-                molins.push({ x: Math.random() * (canvas.width - 50), y: -60, w: 55, h: 55, v: 3 + Math.random() * 3 });
+            angleAspes += 0.05;
+
+            if (Math.random() < 0.025) {
+                molins.push({ x: Math.random() * (canvas.width - 60), y: -100, w: 60, h: 80, v: 2.5 + Math.random() * 2.5 });
             }
 
-            // Moure llances
             llances.forEach((l, i) => {
-                l.y -= 8;
+                l.y -= 10;
                 if (l.y < -50) llances.splice(i, 1);
             });
 
-            // Moure molins i col·lisions
             molins.forEach((m, i) => {
                 m.y += m.v;
-                
-                // Toca terra
                 if (m.y > canvas.height) molins.splice(i, 1);
 
-                // Toca Quixot
-                if (m.y + m.h > quixot.y + 10 && m.x < quixot.x + quixot.w - 10 && m.x + m.w > quixot.x + 10) {
+                // Col·lisió Quixot
+                if (m.y + m.h > quixot.y + 20 && m.x < quixot.x + quixot.w - 10 && m.x + m.w > quixot.x + 10) {
                     molins.splice(i, 1);
                     perdreVida();
                 }
 
-                // Toca Llanca
+                // Col·lisió Llança
                 llances.forEach((l, li) => {
                     if (l.x < m.x + m.w && l.x + l.w > m.x && l.y < m.y + m.h && l.y + l.h > m.y) {
                         molins.splice(i, 1);
@@ -166,23 +242,26 @@
                 });
             });
 
-            // DIBUIXAR
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            ctx.font = "60px Arial";
-            ctx.fillText("🏇", quixot.x, quixot.y + 50);
+            // Dibuixar fons (Terra)
+            ctx.fillStyle = "#8b4513";
+            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+
+            dibuixarQuixot(quixot.x, quixot.y);
             
-            ctx.font = "30px Arial";
-            llances.forEach(l => ctx.fillText("📍", l.x, l.y + 30));
+            ctx.fillStyle = "#ef4444";
+            llances.forEach(l => {
+                ctx.beginPath();
+                ctx.roundRect(l.x, l.y, l.w, l.h, 5);
+                ctx.fill();
+            });
             
-            ctx.font = "60px Arial";
-            molins.forEach(m => ctx.fillText("🎡", m.x, m.y + 50));
+            molins.forEach(m => dibuixarMoli(m));
 
             requestAnimationFrame(bucle);
         }
 
-        // Inici
-        ajustarMida();
         bucle();
     </script>
 </body>
