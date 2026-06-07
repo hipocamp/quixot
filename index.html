@@ -3,47 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quixot vs Molins - NeurekaLAB</title>
+    <title>Quixot Drag & Fight - NeurekaLAB</title>
     
-    <!-- Icona del Quixot per al mòbil -->
     <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/512/8b4513/don-quixote.png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/512/8b4513/don-quixote.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#1e293b">
 
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #fef3c7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #fef3c7; font-family: sans-serif; }
         #joc-container { position: relative; height: 100vh; width: 100vw; display: flex; flex-direction: column; }
         
-        /* Capçalera */
         header { 
             height: 70px; background: #1e293b; color: white; display: flex; 
             justify-content: space-between; align-items: center; padding: 0 20px; 
             box-sizing: border-box; z-index: 10; border-bottom: 3px solid #8b4513;
         }
         .stat-label { font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 800; letter-spacing: 1px; }
-        .stat-val { font-size: 20px; font-weight: 900; color: #facc15; }
+        .stat-val { font-size: 22px; font-weight: 900; color: #facc15; }
 
-        /* Pantalla de joc */
         canvas { background-color: #bae6fd; flex-grow: 1; touch-action: none; }
 
-        /* Peu de pàgina */
         footer { 
-            position: absolute; bottom: 10px; width: 100%; text-align: center; 
-            pointer-events: none; color: rgba(255,255,255,0.6); font-size: 10px; 
+            position: absolute; bottom: 15px; width: 100%; text-align: center; 
+            pointer-events: none; color: rgba(255,255,255,0.5); font-size: 10px; 
             font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
         }
 
-        /* Overlay Game Over */
         #game-over { 
             display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); 
             color: white; flex-direction: column; align-items: center; justify-content: center; 
-            z-index: 100; text-align: center; backdrop-filter: blur(5px);
+            z-index: 100; text-align: center; backdrop-filter: blur(8px);
         }
         .btn-restart { 
-            background: #2563eb; color: white; border: none; padding: 15px 40px; 
+            background: #2563eb; color: white; border: none; padding: 18px 45px; 
             border-radius: 50px; font-weight: 900; font-size: 18px; cursor: pointer; 
-            margin-top: 20px; box-shadow: 0 10px 0 #1e40af;
+            margin-top: 25px; box-shadow: 0 8px 0 #1e40af; active:transform: translateY(4px);
         }
     </style>
 </head>
@@ -52,20 +47,20 @@
     <div id="joc-container">
         <header>
             <div><p class="stat-label">Punts</p><span id="val-punts" class="stat-val">0</span></div>
-            <div id="val-vides" style="font-size: 22px;">❤️❤️❤️</div>
+            <div id="val-vides" style="font-size: 24px;">❤️❤️❤️</div>
             <div style="text-align: right;"><p class="stat-label">Rècord</p><span id="val-record" class="stat-val">0</span></div>
         </header>
 
         <canvas id="jocCanvas"></canvas>
 
         <div id="game-over">
-            <h2 style="font-size: 40px; margin: 0; font-style: italic; color: #f87171;">FINAL DE LA BATALLA</h2>
-            <div style="margin: 20px 0; border: 1px solid #334155; padding: 20px; border-radius: 20px; background: rgba(255,255,255,0.05);">
-                <p style="font-size: 12px; color: #94a3b8; margin: 0;">HAS ACONSEGUIT</p>
-                <p id="punts-finals" style="font-size: 60px; font-weight: 900; margin: 5px 0;">0</p>
-                <p id="txt-record" style="font-size: 12px; color: #fbbf24; display: none;">NOU RÈCORD!</p>
+            <h2 style="font-size: 36px; font-weight: 900; font-style: italic; color: #f87171; margin: 0;">BATALLA FINALITZADA</h2>
+            <div style="margin: 25px 0; border: 2px solid #334155; padding: 25px; border-radius: 30px; background: rgba(255,255,255,0.05); width: 200px;">
+                <p style="font-size: 11px; color: #94a3b8; margin: 0; font-weight: bold;">PUNTS</p>
+                <p id="punts-finals" style="font-size: 64px; font-weight: 900; margin: 5px 0;">0</p>
+                <p id="txt-record" style="font-size: 12px; color: #fbbf24; font-weight: 900; display: none;">NOU RÈCORD!</p>
             </div>
-            <button onclick="reiniciar()" class="btn-restart">TORNAR A CAVALCAR</button>
+            <button onclick="reiniciar()" class="btn-restart">REINTENTAR</button>
         </div>
 
         <footer>By NeurekaLAB</footer>
@@ -79,7 +74,7 @@
         let puntuacio = 0;
         let vides = 3;
         let jocActiu = true;
-        let record = localStorage.getItem("quixot_v4_record") || 0;
+        let record = localStorage.getItem("quixot_drag_record") || 0;
         document.getElementById("val-record").innerText = record;
 
         function ajustarMida() {
@@ -89,90 +84,104 @@
         window.addEventListener('resize', ajustarMida);
         ajustarMida();
 
-        // Objectes
-        const quixot = { x: canvas.width / 2, y: 0, w: 70, h: 70, vel: 0, targetX: canvas.width / 2 };
+        // Propietats Quixot
+        const quixot = { 
+            x: canvas.width / 2 - 35, 
+            y: 0, 
+            w: 70, 
+            h: 70, 
+            isDragging: false 
+        };
+        
         let llances = [];
         let molins = [];
         let angleAspes = 0;
 
-        // CONTROLS TÀCTILS (Toca esquerra per moure esquerra, dreta per moure dreta, mig per disparar)
-        window.addEventListener('touchstart', (e) => {
+        // CONTROLS DE MOVIMENT (ARROSSEGAR) I DISPARAR (TOC)
+        canvas.addEventListener('touchstart', (e) => {
             const touchX = e.touches[0].clientX;
             const touchY = e.touches[0].clientY;
 
             if (!jocActiu) return;
 
-            if (touchY < window.innerHeight / 2) {
-                disparar();
+            // Si toquem la part inferior (zona del cavall), activem arrossegar
+            if (touchY > canvas.height * 0.6) {
+                quixot.isDragging = true;
+                quixot.x = touchX - quixot.w / 2;
             } else {
-                if (touchX < window.innerWidth / 2) {
-                    quixot.vel = -8;
-                } else {
-                    quixot.vel = 8;
-                }
+                // Si toquem la part superior, disparar
+                disparar();
             }
         });
 
-        window.addEventListener('touchend', () => {
-            quixot.vel = 0;
+        canvas.addEventListener('touchmove', (e) => {
+            if (quixot.isDragging && jocActiu) {
+                const touchX = e.touches[0].clientX;
+                quixot.x = touchX - quixot.w / 2;
+                
+                // Límits de la pantalla
+                if (quixot.x < 0) quixot.x = 0;
+                if (quixot.x > canvas.width - quixot.w) quixot.x = canvas.width - quixot.w;
+            }
+        });
+
+        canvas.addEventListener('touchend', () => {
+            quixot.isDragging = false;
         });
 
         function disparar() {
-            llances.push({ x: quixot.x + 30, y: quixot.y, w: 10, h: 40 });
+            llances.push({ x: quixot.x + 30, y: quixot.y, w: 6, h: 35 });
         }
 
-        // Dibuixar el Quixot (Imatge vectorial)
         function dibuixarQuixot(x, y) {
             ctx.save();
             ctx.translate(x, y);
             // Cavall
             ctx.fillStyle = "#5d4037";
-            ctx.fillRect(10, 40, 40, 20); // cos
-            ctx.fillRect(40, 25, 10, 20); // coll
+            ctx.beginPath();
+            ctx.roundRect(10, 40, 45, 22, 10); ctx.fill(); // cos
+            ctx.fillRect(45, 25, 12, 20); // coll
             // Genet (Quixot)
             ctx.fillStyle = "#374151";
-            ctx.fillRect(20, 15, 15, 25); // cos
+            ctx.fillRect(22, 15, 18, 28); // cos
             ctx.fillStyle = "#f3f4f6";
             ctx.beginPath();
-            ctx.arc(27, 10, 8, 0, Math.PI * 2); // cap
-            ctx.fill();
-            // Llança
+            ctx.arc(31, 10, 9, 0, Math.PI * 2); ctx.fill(); // cap
+            // Armadura/Llança
             ctx.strokeStyle = "#94a3b8";
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 4;
             ctx.beginPath();
-            ctx.moveTo(35, 25);
-            ctx.lineTo(60, -10);
+            ctx.moveTo(40, 25);
+            ctx.lineTo(65, -15);
             ctx.stroke();
             ctx.restore();
         }
 
-        // Dibuixar Molí de vent
         function dibuixarMoli(m) {
             ctx.save();
             ctx.translate(m.x + m.w/2, m.y + m.h/2);
-            // Torre
-            ctx.fillStyle = "#f5f5f5";
+            // Torre del molí
+            ctx.fillStyle = "#f8fafc";
             ctx.beginPath();
-            ctx.moveTo(-20, 25);
-            ctx.lineTo(20, 25);
-            ctx.lineTo(15, -20);
-            ctx.lineTo(-15, -20);
+            ctx.moveTo(-22, 35); ctx.lineTo(22, 35);
+            ctx.lineTo(18, -25); ctx.lineTo(-18, -25);
             ctx.fill();
-            ctx.fillStyle = "#8b4513";
-            ctx.fillRect(-18, -25, 36, 10); // Teulada
+            // Teulada
+            ctx.fillStyle = "#78350f";
+            ctx.beginPath();
+            ctx.moveTo(-22, -25); ctx.lineTo(22, -25); ctx.lineTo(0, -45);
+            ctx.fill();
             
-            // Aspes girant
+            // Aspes Giratòries
             ctx.rotate(angleAspes);
             ctx.strokeStyle = "#475569";
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 5;
             for(let i=0; i<4; i++) {
                 ctx.rotate(Math.PI/2);
                 ctx.beginPath();
-                ctx.moveTo(0,0);
-                ctx.lineTo(0, 30);
-                ctx.stroke();
-                ctx.fillStyle = "rgba(255,255,255,0.8)";
-                ctx.fillRect(-5, 10, 10, 20);
+                ctx.moveTo(0,0); ctx.lineTo(0, 35); ctx.stroke();
+                ctx.fillStyle = "rgba(255,255,255,0.7)";
+                ctx.fillRect(-6, 12, 12, 22);
             }
             ctx.restore();
         }
@@ -184,7 +193,7 @@
                 jocActiu = false;
                 if (puntuacio > record) {
                     record = puntuacio;
-                    localStorage.setItem("quixot_v4_record", record);
+                    localStorage.setItem("quixot_drag_record", record);
                     document.getElementById("txt-record").style.display = "block";
                 }
                 document.getElementById("punts-finals").innerText = puntuacio;
@@ -205,19 +214,16 @@
         function bucle() {
             if (!jocActiu) return;
 
-            quixot.y = canvas.height - 100;
-            quixot.x += quixot.vel;
-            if (quixot.x < 0) quixot.x = 0;
-            if (quixot.x > canvas.width - 70) quixot.x = canvas.width - 70;
+            quixot.y = canvas.height - 110;
+            angleAspes += 0.04;
 
-            angleAspes += 0.05;
-
-            if (Math.random() < 0.025) {
-                molins.push({ x: Math.random() * (canvas.width - 60), y: -100, w: 60, h: 80, v: 2.5 + Math.random() * 2.5 });
+            // Dificultat progressiva
+            if (Math.random() < 0.02 + (puntuacio/2000)) {
+                molins.push({ x: Math.random() * (canvas.width - 60), y: -120, w: 60, h: 90, v: 2 + Math.random() * 3 });
             }
 
             llances.forEach((l, i) => {
-                l.y -= 10;
+                l.y -= 12;
                 if (l.y < -50) llances.splice(i, 1);
             });
 
@@ -225,13 +231,13 @@
                 m.y += m.v;
                 if (m.y > canvas.height) molins.splice(i, 1);
 
-                // Col·lisió Quixot
-                if (m.y + m.h > quixot.y + 20 && m.x < quixot.x + quixot.w - 10 && m.x + m.w > quixot.x + 10) {
+                // Col·lisió amb Quixot
+                if (m.y + m.h > quixot.y + 20 && m.x < quixot.x + quixot.w - 15 && m.x + m.w > quixot.x + 15) {
                     molins.splice(i, 1);
                     perdreVida();
                 }
 
-                // Col·lisió Llança
+                // Col·lisió amb Llança
                 llances.forEach((l, li) => {
                     if (l.x < m.x + m.w && l.x + l.w > m.x && l.y < m.y + m.h && l.y + l.h > m.y) {
                         molins.splice(i, 1);
@@ -244,16 +250,17 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Dibuixar fons (Terra)
-            ctx.fillStyle = "#8b4513";
-            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+            // Terra
+            ctx.fillStyle = "#a16207";
+            ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
 
             dibuixarQuixot(quixot.x, quixot.y);
             
+            // Llances
             ctx.fillStyle = "#ef4444";
             llances.forEach(l => {
                 ctx.beginPath();
-                ctx.roundRect(l.x, l.y, l.w, l.h, 5);
+                ctx.roundRect(l.x, l.y, l.w, l.h, 4);
                 ctx.fill();
             });
             
